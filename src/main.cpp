@@ -3,6 +3,8 @@
 #include "SCD30.h"
 #include "Adafruit_MPL3115A2.h"
 #include <Adafruit_MAX31865.h>
+#include <SPI.h>
+#include <SD.h>
 
 #define RREF      4300.0
 #define RNOMINAL  1000.0
@@ -17,9 +19,38 @@ void initSensors() {
   baro.setSeaPressure(1013.26);
   thermo.begin(MAX31865_2WIRE);  // set to 2WIRE or 4WIRE as necessary
 }
+
+void initSD() {
+  if (SD.begin(4)) {
+    Serial.print("SD card initialized\b");
+  } // initialize the SD card
+  if (!(SD.exists("/general/pics") && (SD.exists("/general/data")))) {
+    SD.mkdir("/general/pics");
+    SD.mkdir("/general/data");
+    Serial.print("Folders are made!\n");
+  }
+}
+
+void writeToSD(std::string content, std::string path) {
+  File file = SD.open(path.c_str(), "w", true);
+  if (file) {
+    file.print(content.c_str());
+    file.close();
+    Serial.print("Wrote to file!\n");
+  } else {
+    Serial.print("File does not exist!\n");
+  }
+}
+
+String DumpData(float time, float carbon, float temp, float hum, float pres, float alt) {
+  String content = "";
+  writeToSD(content.c_str(), "/general/data/data.csv");
+}
+
 void testSensors() {
   Serial.println("-----------------");
   Clock::test();
+  writeToSD("Testing!", "/general/data/testing.txt");
   float result[3] = {0};
   if (scd30.isAvailable()) {
         scd30.getCarbonDioxideConcentration(result);
@@ -81,7 +112,9 @@ void testSensors() {
 
 void setup() {
   Serial.begin(115200);
+  pinMode(4, OUTPUT);
   initSensors();
+  initSD();
 }
 void loop() {
   testSensors();

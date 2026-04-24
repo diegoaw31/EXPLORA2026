@@ -15,7 +15,7 @@ String Clock::readClock()
 {
     bool h12, pm, siglo;
     char buf[23];
-    snprintf(buf, sizeof(buf), "%04d/%02d/%02d %02d:%02d:%02d ",
+    snprintf(buf, sizeof(buf), "%04d/%02d/%02d,%02d:%02d:%02d",
              rtc.getYear() + 2000,
              rtc.getMonth(siglo),
              rtc.getDate(),

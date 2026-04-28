@@ -15,7 +15,7 @@
 #define FOLDER "/EXPLORA26"
 #define FILE "/EXPLORA26/data.csv"
 
-#define PERIOD 5000 // 5 seconds in milliseconds
+#define PERIOD 2000 // 2 seconds in milliseconds
 
 Adafruit_MPL3115A2 baro;
 Adafruit_MAX31865 thermo = Adafruit_MAX31865(MAX3185_CS);
@@ -33,7 +33,7 @@ void writeToSD(std::string content, std::string path);
 
 void initSD() {
   if (SD.begin(SDMODULE_CS)) {
-    Serial.print("SD card initialized\b");
+    // Serial.print("SD card initialized\b");
   } // initialize the SD card
   if (!(SD.exists(FOLDER))) {
     SD.mkdir(FOLDER);
@@ -48,9 +48,9 @@ void writeToSD(std::string content, std::string path) {
   if (file) {
     file.print(content.c_str());
     file.close();
-    Serial.print("Wrote to file!\n");
+    // Serial.print("Wrote to file!\n");
   } else {
-    Serial.print("File does not exist!\n");
+    // Serial.print("File does not exist!\n");
   }
 }
 
@@ -126,8 +126,11 @@ void testSensors() {
 void setup() {
   Serial.begin(115200);
   pinMode(4, OUTPUT);
+  pinMode(2, OUTPUT);
+  digitalWrite(2, LOW);
   initSensors();
   initSD();
+  // Clock::writeClock(2024, 4, 28, 18, 25, 00);
 }
 
 int timer = 0;
@@ -144,6 +147,8 @@ float baroalt = 0;
 float barotemp = 0;
 float rawozone = 0;
 float ozone = 0;
+
+bool ledState = false;
 
 char buf[10];
 String imageName;
@@ -180,6 +185,9 @@ void loop() {
 
     timeString.toCharArray(timeChar, sizeof(timeChar));
     DumpData(timeChar, rtdtemp, rtdfault, scd30co2, scd30temp, scd30hum, baropres, baroalt, barotemp, rawozone, ozone);
+
+    digitalWrite(2, !ledState);
+    ledState = !ledState;
   }
 
   // testSensors();
